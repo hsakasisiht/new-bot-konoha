@@ -1,0 +1,55 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Google credentials and sensitive files
+google-credentials.json
+client_secret_*.json
+sublime-index-*.json
+*.json
+!package.json
+!package-lock.json
+
+# WhatsApp session data
+sessions/
+.wwebjs_auth/
+
+# Database files
+*.sqlite
+*.db
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+
+# Data files that may contain sensitive information
+data/*.json
+config/*.json
