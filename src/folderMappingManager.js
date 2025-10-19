@@ -20,9 +20,13 @@ class FolderMappingManager {
     async init() {
         try {
             await this.loadMappings();
-            console.log(chalk.green('📁 Folder mapping system initialized'));
+            if (!config.production || config.logging.showStartup) {
+                console.log(chalk.green('📁 Folder mapping system initialized'));
+            }
         } catch (error) {
-            console.error(chalk.red('❌ Failed to initialize folder mapping:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Failed to initialize folder mapping system:', error.message));
+            }
         }
     }
 
@@ -34,14 +38,20 @@ class FolderMappingManager {
             if (await fs.pathExists(this.mappingsFilePath)) {
                 const data = await fs.readJson(this.mappingsFilePath);
                 this.mappings = new Map(Object.entries(data));
-                console.log(chalk.cyan(`📂 Loaded ${this.mappings.size} folder mappings`));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.cyan(`📂 Loaded ${this.mappings.size} folder mappings`));
+                }
             } else {
                 // Create empty mappings file
                 await this.saveMappings();
-                console.log(chalk.yellow('📝 Created new folder mappings file'));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.yellow('📝 Created new folder mappings file'));
+                }
             }
         } catch (error) {
-            console.error(chalk.red('❌ Error loading mappings:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Error loading mappings:', error.message));
+            }
             this.mappings = new Map();
         }
     }

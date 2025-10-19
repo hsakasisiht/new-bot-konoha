@@ -19,9 +19,13 @@ class ContactManager {
     async init() {
         try {
             await this.loadContacts();
-            console.log(chalk.green('📇 Contact management system initialized'));
+            if (!config.production || config.logging.showStartup) {
+                console.log(chalk.green('📇 Contact management system initialized'));
+            }
         } catch (error) {
-            console.error(chalk.red('❌ Failed to initialize contact management:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Failed to initialize contact management:', error.message));
+            }
         }
     }
 
@@ -33,14 +37,20 @@ class ContactManager {
             if (await fs.pathExists(this.contactsFilePath)) {
                 const data = await fs.readJson(this.contactsFilePath);
                 this.contacts = new Map(Object.entries(data));
-                console.log(chalk.cyan(`📂 Loaded ${this.contacts.size} contacts`));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.cyan(`📂 Loaded ${this.contacts.size} contacts`));
+                }
             } else {
                 // Create empty contacts file
                 await this.saveContacts();
-                console.log(chalk.yellow('📝 Created new contacts file'));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.yellow('📝 Created new contacts file'));
+                }
             }
         } catch (error) {
-            console.error(chalk.red('❌ Error loading contacts:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Error loading contacts:', error.message));
+            }
             this.contacts = new Map();
         }
     }

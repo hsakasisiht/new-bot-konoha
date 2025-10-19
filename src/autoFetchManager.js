@@ -31,7 +31,9 @@ class AutoFetchManager {
     async initialize(googleDriveManager, client) {
         this.googleDriveManager = googleDriveManager;
         this.client = client;
-        console.log(chalk.green('🔄 Auto-fetch manager initialized with Google Drive and WhatsApp client'));
+        if (!config.production || config.logging.showStartup) {
+            console.log(chalk.green('🔄 Auto-fetch manager initialized with Google Drive and WhatsApp client'));
+        }
         
         // Start monitoring existing mappings now that we have Google Drive
         if (this.mappings.size > 0) {
@@ -45,9 +47,13 @@ class AutoFetchManager {
     async init() {
         try {
             await this.loadMappings();
-            console.log(chalk.green('🔄 Auto-fetch system initialized'));
+            if (!config.production || config.logging.showStartup) {
+                console.log(chalk.green('🔄 Auto-fetch system initialized'));
+            }
         } catch (error) {
-            console.error(chalk.red('❌ Failed to initialize auto-fetch:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Failed to initialize auto-fetch:', error.message));
+            }
         }
     }
 
@@ -59,12 +65,16 @@ class AutoFetchManager {
             if (await fs.pathExists(this.mappingsFilePath)) {
                 const data = await fs.readJson(this.mappingsFilePath);
                 this.mappings = new Map(Object.entries(data));
-                console.log(chalk.cyan(`📂 Loaded ${this.mappings.size} auto-fetch mappings`));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.cyan(`📂 Loaded ${this.mappings.size} auto-fetch mappings`));
+                }
                 
                 // Note: Don't start monitoring here - will be started after initialization
             } else {
                 await this.saveMappings();
-                console.log(chalk.yellow('📝 Created new auto-fetch mappings file'));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.yellow('📝 Created new auto-fetch mappings file'));
+                }
             }
         } catch (error) {
             console.error(chalk.red('❌ Error loading auto-fetch mappings:', error.message));

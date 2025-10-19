@@ -153,13 +153,15 @@ class KonohaBot {
             // Initialize command handler
             this.commandHandler = new CommandHandler(this.client, this);
             
-            // Show available commands
-            const commands = this.commandHandler.getCommandInfo();
-            console.log(chalk.cyan('\n📋 Available Commands:'));
-            commands.forEach(cmd => {
-                const groupInfo = cmd.groupOnly ? ' (Groups only)' : '';
-                console.log(chalk.cyan(`  ${cmd.name} - ${cmd.description}${groupInfo}`));
-            });
+            // Show available commands (only in non-production or when startup logging is enabled)
+            if (!config.production || config.logging.showStartup) {
+                const commands = this.commandHandler.getCommandInfo();
+                console.log(chalk.cyan('\n📋 Available Commands:'));
+                commands.forEach(cmd => {
+                    const groupInfo = cmd.groupOnly ? ' (Groups only)' : '';
+                    console.log(chalk.cyan(`  ${cmd.name} - ${cmd.description}${groupInfo}`));
+                });
+            }
             console.log(chalk.green('\n✨ Bot is now listening for messages...\n'));
         });
 
@@ -212,8 +214,8 @@ class KonohaBot {
 
         // Message creation (sent by bot)
         this.client.on('message_create', (message) => {
-            // Log messages sent by the bot
-            if (message.fromMe && message.body) {
+            // Only log command responses or when verbose logging is enabled
+            if (message.fromMe && message.body && config.logging.verboseMessages) {
                 console.log(chalk.gray(`📤 Sent: ${message.body}`));
             }
         });
@@ -253,7 +255,11 @@ class KonohaBot {
      * Start the bot
      */
     async start() {
-        console.log(chalk.blue.bold(`
+        if (config.production) {
+            console.log(chalk.green.bold('🍃 Konoha Bot Starting...'));
+            console.log(chalk.blue(`🚀 Mode: Production | Started: ${moment().format('YYYY-MM-DD HH:mm:ss')}`));
+        } else {
+            console.log(chalk.blue.bold(`
 ╔══════════════════════════════════════════════════════╗
 ║                    🍃 KONOHA BOT 🍃                   ║
 ║                                                      ║
@@ -266,6 +272,7 @@ class KonohaBot {
 ║  🏓 Ping Command                                     ║
 ╚══════════════════════════════════════════════════════╝
         `));
+        }
 
         // Handle graceful shutdown
         process.on('SIGINT', async () => {

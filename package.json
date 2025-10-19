@@ -5,6 +5,7 @@
   "main": "src/bot.js",
   "scripts": {
     "start": "node src/bot.js",
+    "start:prod": "node start-production.js",
     "start:enhanced": "node start-enhanced.js",
     "start:linux": "./start-linux.sh start",
     "stop:linux": "./start-linux.sh stop",

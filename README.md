@@ -47,14 +47,18 @@ Update bot configuration in `src/config.js` with your bot owner phone number.
 
 #### On Windows/macOS:
 ```bash
+# Development mode (verbose logging)
 npm start
+
+# Production mode (minimal logging, auto-restart)
+npm run start:prod
 ```
 
 #### On Linux (Ubuntu/Debian):
 If you encounter Chrome dependency issues, run the setup script first:
 ```bash
 # Make scripts executable
-chmod +x setup-linux.sh quick-fix-linux.sh start-linux.sh
+chmod +x setup-linux.sh quick-fix-linux.sh start-linux.sh start-production.js
 
 # For full setup (recommended)
 ./setup-linux.sh
@@ -62,8 +66,8 @@ chmod +x setup-linux.sh quick-fix-linux.sh start-linux.sh
 # Or for quick fix only
 ./quick-fix-linux.sh
 
-# Start with enhanced error recovery (recommended for servers)
-npm run start:enhanced
+# Production deployment (recommended for servers)
+npm run start:prod
 
 # Or use the Linux management script
 npm run start:linux
@@ -139,7 +143,52 @@ npm start
 .fetchexcel
 ```
 
-## 🔐 Security Notes
+## � Production Deployment
+
+### Production Mode Features
+- ✅ **Minimal Logging**: Only shows commands and errors
+- ✅ **Auto-Restart**: Automatically restarts on crashes (max 10 attempts)  
+- ✅ **Performance Optimized**: Reduced console output for better performance
+- ✅ **Error Resilience**: Handles execution context errors silently
+- ✅ **Process Management**: Graceful shutdown and restart capabilities
+
+### Quick Production Setup
+```bash
+# 1. Configure environment
+cp .env.template .env
+# Edit .env with your settings
+
+# 2. Start in production mode
+npm run start:prod
+
+# 3. For Linux servers with Docker
+docker-compose up -d
+```
+
+### Production Environment Variables
+```bash
+# Essential for production
+NODE_ENV=production
+PRODUCTION=true
+VERBOSE_LOGGING=false
+
+# Linux-specific
+DISPLAY=:99
+CHROME_BIN=/usr/bin/google-chrome-stable
+```
+
+### Production vs Development Mode
+
+| Feature | Development | Production |
+|---------|-------------|-----------|
+| Startup Banner | Full ASCII art | Minimal banner |
+| System Logs | All initialization steps | Essential only |
+| Command Logging | Full details | Timestamp + command only |
+| Message Logging | All sent messages | Commands only |
+| Error Handling | Verbose errors | Silent context errors |
+| Auto-restart | Manual | Automatic (10 attempts) |
+
+## �🔐 Security Notes
 
 **NEVER commit these files to Git:**
 - `google-credentials.json`

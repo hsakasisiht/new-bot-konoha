@@ -20,10 +20,14 @@ class OwnerManager {
     async init() {
         try {
             await this.loadOwners();
-            console.log(chalk.green('👑 Owner management system initialized'));
-            console.log(chalk.blue(`🤖 Bot Owner: ${config.botOwner.number}`));
+            if (!config.production || config.logging.showStartup) {
+                console.log(chalk.green('👑 Owner management system initialized'));
+                console.log(chalk.blue(`🤖 Bot Owner: ${config.botOwner.number}`));
+            }
         } catch (error) {
-            console.error(chalk.red('❌ Failed to initialize owner management:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Failed to initialize owner management:', error.message));
+            }
         }
     }
 
@@ -35,14 +39,20 @@ class OwnerManager {
             if (await fs.pathExists(this.ownerFilePath)) {
                 const data = await fs.readJson(this.ownerFilePath);
                 this.owners = new Map(Object.entries(data));
-                console.log(chalk.cyan(`📂 Loaded ${this.owners.size} group owners`));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.cyan(`📂 Loaded ${this.owners.size} group owners`));
+                }
             } else {
                 // Create empty owners file
                 await this.saveOwners();
-                console.log(chalk.yellow('📝 Created new group owners file'));
+                if (!config.production || config.logging.showStartup) {
+                    console.log(chalk.yellow('📝 Created new group owners file'));
+                }
             }
         } catch (error) {
-            console.error(chalk.red('❌ Error loading owners:', error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red('❌ Error loading owners:', error.message));
+            }
             this.owners = new Map();
         }
     }

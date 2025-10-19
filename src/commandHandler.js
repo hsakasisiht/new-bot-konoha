@@ -19,12 +19,14 @@ class CommandHandler {
         // Load commands from the commands directory
         this.commands = CommandLoader.loadCommands();
         
-        console.log(chalk.blue(`🔧 Loaded ${this.commands.size} commands`));
-        
-        // Log loaded commands
-        if (this.commands.size > 0) {
-            const commandNames = Array.from(this.commands.keys()).join(', ');
-            console.log(chalk.cyan(`� Available: ${commandNames}`));
+        if (!config.production || config.logging.showStartup) {
+            console.log(chalk.blue(`🔧 Loaded ${this.commands.size} commands`));
+            
+            // Log loaded commands
+            if (this.commands.size > 0) {
+                const commandNames = Array.from(this.commands.keys()).join(', ');
+                console.log(chalk.cyan(`📁 Available: ${commandNames}`));
+            }
         }
     }
 
@@ -62,10 +64,17 @@ class CommandHandler {
         }
 
         try {
-            console.log(chalk.cyan(`📝 Executing command: ${commandName} from ${message.from}`));
+            // Log command execution (only show commands, not all messages)
+            if (config.logging.showCommands) {
+                const userInfo = message.from.includes('@g.us') ? 'Group' : 'DM';
+                const timestamp = moment().format('HH:mm:ss');
+                console.log(chalk.cyan(`[${timestamp}] 🔧 ${commandName} (${userInfo})`));
+            }
             await command.execute(message, args, this.client, this.botInstance);
         } catch (error) {
-            console.error(chalk.red(`❌ Error executing command ${commandName}:`, error.message));
+            if (config.logging.showErrors) {
+                console.error(chalk.red(`❌ Error executing command ${commandName}:`, error.message));
+            }
         }
     }
 

@@ -3,6 +3,17 @@ const config = {
     botName: 'Konoha Bot',
     prefix: '.',
     
+    // Production Mode (set to true for production deployment)
+    production: process.env.NODE_ENV === 'production' || process.env.PRODUCTION === 'true',
+    
+    // Logging Configuration
+    logging: {
+        verboseMessages: process.env.VERBOSE_LOGGING === 'true' || false,
+        showCommands: true,
+        showStartup: true,
+        showErrors: true
+    },
+    
     // Session Configuration
     sessionPath: './sessions',
     sessionName: 'konoha-session',
