@@ -26,11 +26,17 @@ class KonohaBot {
         this.isReady = false;
         this.startTime = moment();
         
-        // Create readline interface for user input
-        this.rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+        // Create readline interface for user input (only if not in PM2/headless mode)
+        this.rl = null;
+        this.isPM2 = process.env.PM2_HOME || process.env.NODE_APP_INSTANCE !== undefined;
+        this.isHeadless = !process.stdin.isTTY || this.isPM2;
+        
+        if (!this.isHeadless) {
+            this.rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+        }
     }
 
     /**
@@ -99,15 +105,25 @@ class KonohaBot {
     setupEventHandlers() {
         // QR Code generation (for first-time authentication)
         this.client.on('qr', (qr) => {
-            console.log(chalk.yellow('📱 Scan this QR code with your WhatsApp:'));
-            qrcode.generate(qr, { small: true });
-            console.log(chalk.cyan('Or use pairing code authentication (recommended)'));
+            if (this.isHeadless || this.isPM2) {
+                console.log(chalk.yellow('📱 QR Code for WhatsApp authentication:'));
+                console.log(chalk.cyan('🔗 QR Code Data (use a QR code generator to display):'));
+                console.log(chalk.gray(qr));
+                console.log(chalk.blue('💡 Copy the QR data above to a QR code generator or use pairing code instead'));
+            } else {
+                console.log(chalk.yellow('📱 Scan this QR code with your WhatsApp:'));
+                qrcode.generate(qr, { small: true });
+            }
+            console.log(chalk.cyan('Or use pairing code authentication (recommended for servers)'));
         });
 
         // Pairing code event (new authentication method)
         this.client.on('code', async (code) => {
             console.log(chalk.green.bold(`🔐 Pairing Code: ${code}`));
             console.log(chalk.yellow('Enter this code in WhatsApp > Linked Devices > Link a Device > Link with Phone Number'));
+            if (this.isPM2) {
+                console.log(chalk.blue('📋 PM2 Logs: Use "pm2 logs konoha-bot" to see this pairing code'));
+            }
         });
 
         // Authentication success
@@ -225,17 +241,32 @@ class KonohaBot {
      * Handle authentication failure
      */
     async handleAuthFailure() {
-        console.log(chalk.yellow('🔄 Attempting to clear session and retry...'));
-        await this.sessionManager.deleteSession();
-        
-        this.rl.question(chalk.blue('❓ Do you want to retry authentication? (y/n): '), async (answer) => {
-            if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
-                await this.restart();
+        console.log(chalk.yellow('🔄 Cleaning up session and retrying...'));
+        try {
+            await this.sessionManager.clearSession();
+            
+            if (this.isHeadless || this.isPM2) {
+                // In PM2/headless mode, automatically retry without user input
+                console.log(chalk.blue('🔄 Running in headless mode - automatically retrying authentication...'));
+                console.log(chalk.yellow('💡 Please scan QR code or use pairing code when prompted'));
+                setTimeout(async () => {
+                    await this.initializeClient();
+                }, 3000);
             } else {
-                console.log(chalk.red('👋 Goodbye!'));
-                process.exit(0);
+                // Interactive mode - ask user
+                this.rl.question(chalk.blue('❓ Do you want to retry authentication? (y/n): '), async (answer) => {
+                    if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+                        await this.initializeClient();
+                    } else {
+                        console.log(chalk.red('👋 Goodbye!'));
+                        process.exit(0);
+                    }
+                });
             }
-        });
+        } catch (error) {
+            console.error(chalk.red('❌ Error during auth failure handling:', error.message));
+            process.exit(1);
+        }
     }
 
     /**
@@ -258,6 +289,12 @@ class KonohaBot {
         if (config.production) {
             console.log(chalk.green.bold('🍃 Konoha Bot Starting...'));
             console.log(chalk.blue(`🚀 Mode: Production | Started: ${moment().format('YYYY-MM-DD HH:mm:ss')}`));
+            if (this.isPM2) {
+                console.log(chalk.cyan('⚙️ Process Manager: PM2 Detected'));
+            }
+            if (this.isHeadless) {
+                console.log(chalk.yellow('🖥️ Running in headless mode - QR code/pairing will be logged'));
+            }
         } else {
             console.log(chalk.blue.bold(`
 ╔══════════════════════════════════════════════════════╗

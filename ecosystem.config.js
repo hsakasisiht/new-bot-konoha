@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'konoha-bot',
-      script: 'src/bot.js',
+      script: 'pm2-start.js',
       cwd: './',
       instances: 1,
       exec_mode: 'fork',

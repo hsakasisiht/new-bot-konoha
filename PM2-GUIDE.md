@@ -8,16 +8,30 @@ npm install -g pm2
 ```
 
 ### 2. Start Bot with PM2
+
+#### First Time Setup (Authentication Required)
+```bash
+# Method 1: Interactive authentication (recommended)
+npm run pm2:auth
+
+# Method 2: Manual authentication
+npm run pm2:start      # Start with PM2
+npm run pm2:logs       # View logs for pairing code
+# Enter the pairing code shown in logs into WhatsApp
+
+# Method 3: Development mode first, then PM2
+npm start              # Authenticate interactively
+# Press Ctrl+C after authentication
+npm run pm2:start      # Start with PM2
+```
+
+#### Regular Startup (After Authentication)
 ```bash
 # Production mode
 npm run pm2:start
 
 # Development mode  
 npm run pm2:dev
-
-# Or use the management script
-chmod +x pm2.sh
-./pm2.sh prod
 ```
 
 ### 3. Manage the Bot
@@ -172,8 +186,12 @@ pm2 set pm2-logrotate:compress true
 ./pm2.sh logs          # Check error logs
 pm2 describe konoha-bot # Detailed status
 
+# Readline error (ERR_USE_AFTER_CLOSE)
+npm run pm2:auth       # Use authentication helper
+# Or start in development mode first: npm start
+
 # Permission issues
-chmod +x pm2.sh
+chmod +x pm2.sh setup-auth.sh
 sudo chown -R $USER:$USER .
 
 # Chrome dependencies (Linux)
