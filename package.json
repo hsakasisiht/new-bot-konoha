@@ -5,6 +5,11 @@
   "main": "src/bot.js",
   "scripts": {
     "start": "node src/bot.js",
+    "start:enhanced": "node start-enhanced.js",
+    "start:linux": "./start-linux.sh start",
+    "stop:linux": "./start-linux.sh stop",
+    "restart:linux": "./start-linux.sh restart",
+    "status:linux": "./start-linux.sh status",
     "dev": "node --watch src/bot.js",
     "status": "node check-status.js",
     "check": "node check-status.js"

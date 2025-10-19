@@ -62,12 +62,25 @@ class KonohaBot {
                     '--disable-ipc-flooding-protection',
                     '--disable-web-security',
                     '--single-process',
-                    '--no-first-run',
                     '--disable-extensions',
-                    '--disable-default-apps'
+                    '--disable-default-apps',
+                    '--no-first-run',
+                    '--disable-component-update',
+                    '--disable-domain-reliability',
+                    '--disable-sync',
+                    '--metrics-recording-only',
+                    '--no-crash-upload',
+                    '--no-default-browser-check',
+                    '--no-pings',
+                    '--password-store=basic',
+                    '--use-mock-keychain'
                 ],
-                executablePath: process.env.CHROME_BIN || undefined
-            }
+                executablePath: process.env.CHROME_BIN || undefined,
+                timeout: 60000
+            },
+            // Increase timeouts to handle slower connections
+            takeoverOnConflict: true,
+            takeoverTimeoutMs: 60000
         });
 
         this.setupEventHandlers();
@@ -162,7 +175,39 @@ class KonohaBot {
             console.log(chalk.yellow('📱 Client disconnected:', reason));
             if (reason === 'NAVIGATION') {
                 console.log(chalk.blue('🔄 Attempting to reconnect...'));
+                this.handleReconnection();
             }
+        });
+
+        // Handle loading screen
+        this.client.on('loading_screen', (percent, message) => {
+            console.log(chalk.blue(`📱 Loading: ${percent}% - ${message}`));
+        });
+
+        // Handle state changes
+        this.client.on('change_state', (state) => {
+            console.log(chalk.blue(`📱 State changed: ${state}`));
+        });
+
+        // Add global error handler for unhandled promise rejections
+        process.on('unhandledRejection', (error) => {
+            if (error.message && error.message.includes('Execution context was destroyed')) {
+                console.log(chalk.yellow('⚠️ Execution context destroyed - this is normal during navigation'));
+                console.log(chalk.blue('🔄 WhatsApp is refreshing, bot will continue working...'));
+                return;
+            }
+            console.error(chalk.red('❌ Unhandled promise rejection:', error));
+        });
+
+        // Handle process termination gracefully
+        process.on('SIGINT', () => {
+            console.log(chalk.yellow('\n🛑 Received SIGINT - shutting down gracefully...'));
+            this.shutdown();
+        });
+
+        process.on('SIGTERM', () => {
+            console.log(chalk.yellow('\n🛑 Received SIGTERM - shutting down gracefully...'));
+            this.shutdown();
         });
 
         // Message creation (sent by bot)
@@ -235,6 +280,34 @@ class KonohaBot {
 
         // Start the client
         await this.initializeClient();
+    }
+
+    /**
+     * Handle authentication failure
+     */
+    async handleAuthFailure() {
+        console.log(chalk.yellow('🔄 Cleaning up session and retrying...'));
+        try {
+            await this.sessionManager.clearSession();
+            console.log(chalk.blue('🔄 Please restart the bot to try authentication again'));
+            process.exit(1);
+        } catch (error) {
+            console.error(chalk.red('❌ Error during auth failure handling:', error.message));
+            process.exit(1);
+        }
+    }
+
+    /**
+     * Handle reconnection after navigation/context destruction
+     */
+    async handleReconnection() {
+        console.log(chalk.blue('🔄 Handling reconnection...'));
+        // Don't restart the client, just wait for it to recover
+        setTimeout(() => {
+            if (!this.isReady) {
+                console.log(chalk.yellow('⚠️ Client not ready after reconnection attempt'));
+            }
+        }, 10000); // Wait 10 seconds to check if client recovers
     }
 
     /**

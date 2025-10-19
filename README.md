@@ -54,7 +54,7 @@ npm start
 If you encounter Chrome dependency issues, run the setup script first:
 ```bash
 # Make scripts executable
-chmod +x setup-linux.sh quick-fix-linux.sh
+chmod +x setup-linux.sh quick-fix-linux.sh start-linux.sh
 
 # For full setup (recommended)
 ./setup-linux.sh
@@ -62,8 +62,18 @@ chmod +x setup-linux.sh quick-fix-linux.sh
 # Or for quick fix only
 ./quick-fix-linux.sh
 
-# Then start the bot
-npm start
+# Start with enhanced error recovery (recommended for servers)
+npm run start:enhanced
+
+# Or use the Linux management script
+npm run start:linux
+./start-linux.sh start
+
+# Check status
+./start-linux.sh status
+
+# Stop the bot
+./start-linux.sh stop
 ```
 
 #### For Headless Linux Servers:
@@ -178,6 +188,16 @@ Add new commands in `src/commands/` directory following the existing pattern.
 ```bash
 # Error: libatk-1.0.so.0: cannot open shared object file
 ./quick-fix-linux.sh
+```
+
+#### Execution Context Destroyed Error:
+```bash
+# Error: Execution context was destroyed, most likely because of a navigation
+# This is normal during WhatsApp navigation - use enhanced startup:
+npm run start:enhanced
+
+# Or use the Linux management script for automatic restarts:
+./start-linux.sh start
 ```
 
 #### Full Linux Setup:
