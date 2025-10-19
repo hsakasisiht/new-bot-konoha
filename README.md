@@ -93,6 +93,27 @@ Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 npm start
 ```
 
+#### PM2 Process Manager (Recommended for Production):
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Quick start with PM2
+npm run pm2:start      # Production mode
+npm run pm2:dev        # Development mode
+
+# Or use the management script
+chmod +x pm2.sh
+./pm2.sh prod          # Start in production
+./pm2.sh status        # Check status
+./pm2.sh logs          # View logs
+./pm2.sh stop          # Stop bot
+
+# Setup auto-start on boot
+./pm2.sh setup
+pm2 save
+```
+
 ### 5. WhatsApp Authentication
 - Scan the QR code with your WhatsApp
 - Or use phone number + pairing code method
@@ -143,7 +164,26 @@ npm start
 .fetchexcel
 ```
 
-## � Production Deployment
+## 🚀 Production Deployment
+
+### PM2 Process Manager (⭐ Recommended)
+```bash
+# Quick setup
+npm install -g pm2
+npm run pm2:start
+
+# Management commands
+npm run pm2:status     # Check status
+npm run pm2:logs       # View logs  
+npm run pm2:restart    # Restart bot
+npm run pm2:stop       # Stop bot
+
+# Advanced management script
+chmod +x pm2.sh
+./pm2.sh prod         # Start production
+./pm2.sh monitor      # Real-time monitoring
+./pm2.sh setup        # Auto-start on boot
+```
 
 ### Production Mode Features
 - ✅ **Minimal Logging**: Only shows commands and errors
@@ -176,6 +216,20 @@ VERBOSE_LOGGING=false
 DISPLAY=:99
 CHROME_BIN=/usr/bin/google-chrome-stable
 ```
+
+### PM2 vs Other Methods
+
+| Feature | PM2 | Docker | Manual Scripts |
+|---------|-----|--------|----------------|
+| **Auto-restart** | ✅ Advanced | ✅ Basic | ⚠️ Custom |
+| **Log Management** | ✅ Built-in rotation | ⚠️ Manual setup | ❌ Basic |
+| **Monitoring** | ✅ Real-time dashboard | ⚠️ External tools | ❌ None |
+| **Zero-downtime** | ✅ Built-in reload | ❌ Container restart | ❌ Manual |
+| **Cluster Mode** | ✅ Native support | ⚠️ Orchestration | ❌ Complex |
+| **Memory Management** | ✅ Auto-restart on limits | ✅ Container limits | ❌ Manual |
+| **Boot Integration** | ✅ One command setup | ⚠️ Systemd/Docker | ⚠️ Manual scripts |
+
+**🏆 Recommended: PM2 for production deployments**
 
 ### Production vs Development Mode
 

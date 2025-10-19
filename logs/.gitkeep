@@ -1,0 +1,5 @@
+# This file keeps the logs directory in git
+# PM2 will create log files here:
+# - konoha-bot-error.log
+# - konoha-bot-out.log  
+# - konoha-bot-combined.log

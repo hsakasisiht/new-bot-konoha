@@ -29,7 +29,8 @@ sessions/
 
 # Log files
 *.log
-logs/
+logs/*.log
+!logs/.gitkeep
 
 # OS generated files
 .DS_Store
