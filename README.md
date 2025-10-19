@@ -44,7 +44,38 @@ npm install
 Update bot configuration in `src/config.js` with your bot owner phone number.
 
 ### 4. Run the Bot
+
+#### On Windows/macOS:
 ```bash
+npm start
+```
+
+#### On Linux (Ubuntu/Debian):
+If you encounter Chrome dependency issues, run the setup script first:
+```bash
+# Make scripts executable
+chmod +x setup-linux.sh quick-fix-linux.sh
+
+# For full setup (recommended)
+./setup-linux.sh
+
+# Or for quick fix only
+./quick-fix-linux.sh
+
+# Then start the bot
+npm start
+```
+
+#### For Headless Linux Servers:
+```bash
+# Set environment variables
+export DISPLAY=:99
+export CHROME_BIN=/usr/bin/google-chrome-stable
+
+# Start virtual display (if needed)
+Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+# Start the bot
 npm start
 ```
 
@@ -134,10 +165,54 @@ Add new commands in `src/commands/` directory following the existing pattern.
 
 ## 📞 Support & Troubleshooting
 
+### Common Issues
+
 1. **Bot won't start**: Check Node.js version (16+)
 2. **Drive integration issues**: Verify service account setup
 3. **Authentication problems**: Clear sessions folder and restart
 4. **Command not working**: Use `.help [command]` for usage info
+
+### Linux-Specific Issues
+
+#### Chrome/Puppeteer Dependencies Error:
+```bash
+# Error: libatk-1.0.so.0: cannot open shared object file
+./quick-fix-linux.sh
+```
+
+#### Full Linux Setup:
+```bash
+# Complete dependency installation
+./setup-linux.sh
+```
+
+#### Headless Server Setup:
+```bash
+# Install virtual display
+sudo apt-get install xvfb
+
+# Set environment
+export DISPLAY=:99
+Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+# Alternative: Use Chrome in container mode
+export CHROME_BIN=/usr/bin/google-chrome-stable
+```
+
+#### Docker Alternative:
+```dockerfile
+FROM node:18-slim
+
+# Install Chrome dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV CHROME_BIN=/usr/bin/chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+```
 
 ## 🔄 Updates
 

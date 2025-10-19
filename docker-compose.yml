@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  konoha-bot:
+    build: .
+    container_name: konoha-whatsapp-bot
+    restart: unless-stopped
+    volumes:
+      # Mount sessions and data for persistence
+      - ./sessions:/app/sessions
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      - NODE_ENV=production
+      - DISPLAY=:99
+      - CHROME_BIN=/usr/bin/chromium
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    # Uncomment if you need to expose ports
+    # ports:
+    #   - "3000:3000"
+    
+    # For development with live reload
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
