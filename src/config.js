@@ -99,6 +99,10 @@ const config = {
             enabled: true,
             description: 'Authenticate Google Drive for auto-fetch system (Bot Owner Only)'
         },
+        broadcast: {
+            enabled: true,
+            description: 'Broadcast a message to all groups (Bot Owner Only)'
+        },
         help: {
             enabled: true,
             description: 'Show available commands and usage help'
