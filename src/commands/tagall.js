@@ -52,8 +52,9 @@ class TagAllCommand {
             // Add all participants to mentions
             for (const participant of participants) {
                 // Workaround: getContactById is failing due to WWebJS internal error
-                // We pass the participant object directly as it contains the id property
-                mentions.push(participant);
+                // We pass the serialized ID string directly as the library expects Contact objects or strings
+                // Passing the raw participant object fails because it's not a Contact instance
+                mentions.push(participant.id._serialized);
                 tagText += `@${participant.id.user} `;
             }
 
