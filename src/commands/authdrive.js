@@ -162,9 +162,26 @@ class AuthDriveCommand {
         const hasCredentials = require('fs').existsSync('./config/google-credentials.json');
         const hasToken = require('fs').existsSync('./config/google-token.json');
         
+        // Check if using Service Account
+        let isServiceAccount = false;
+        if (hasCredentials) {
+            try {
+                const creds = require('../../config/google-credentials.json');
+                isServiceAccount = creds.type === 'service_account';
+            } catch (e) {
+                // Ignore error
+            }
+        }
+
         let response = `📊 *Google Drive Status*\n\n`;
         response += `📄 **Credentials:** ${hasCredentials ? '✅ Found' : '❌ Missing'}\n`;
-        response += `🔐 **Token:** ${hasToken ? '✅ Found' : '❌ Missing'}\n`;
+        
+        if (isServiceAccount) {
+            response += `🤖 **Auth Type:** Service Account (No Token Needed)\n`;
+        } else {
+            response += `🔐 **Token:** ${hasToken ? '✅ Found' : '❌ Missing'}\n`;
+        }
+        
         response += `⚙️ **Configured:** ${isConfigured ? '✅ Ready' : '❌ Not Ready'}\n`;
         response += `🔄 **Auto-fetch:** ${isConfigured ? '✅ Enabled' : '❌ Disabled'}\n\n`;
         
@@ -173,11 +190,11 @@ class AuthDriveCommand {
             response += `📁 **Location:** config/google-credentials.json\n\n`;
         }
         
-        if (!hasToken) {
+        if (!isServiceAccount && !hasToken) {
             response += `🔐 **Authentication Required:**\n`;
             response += `1. Use \`.authdrive url\` to get auth link\n`;
             response += `2. Use \`.authdrive code [code]\` to complete setup`;
-        } else {
+        } else if (isConfigured) {
             response += `✅ **Ready to use Google Drive commands!**`;
         }
         
