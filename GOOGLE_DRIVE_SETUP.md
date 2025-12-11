@@ -1,118 +1,110 @@
-# Google Drive Integration Setup Guide
+#  Google Drive Integration Guide
 
-## Overview
-This bot can fetch the latest Excel files from Google Drive and send them to configured contacts automatically.
+This guide explains how to set up and use the Google Drive integration features of the Konoha Bot.
 
-## Features
-- Fetch latest Excel files from a specific Google Drive folder
-- Send files to configured WhatsApp contacts
-- Support for both personal and group chats
-- Bot owner-only access for security
+##  Quick Start
 
-## Setup Steps
+### 1. Prerequisites
+Ensure you have the `google-credentials.json` file in the `config/` folder. This file is obtained from the Google Cloud Console (OAuth 2.0 Client ID).
 
-### 1. Google Cloud Console Setup
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing one
-3. Enable the Google Drive API:
-   - Go to "APIs & Services" > "Library"
-   - Search for "Google Drive API"
-   - Click "Enable"
+### 2. Authentication (One-Time Setup)
+You need to authorize the bot to access your Google Drive. This is done directly through WhatsApp.
 
-### 2. Create Credentials
-1. Go to "APIs & Services" > "Credentials"
-2. Click "Create Credentials" > "OAuth 2.0 Client IDs"
-3. Configure OAuth consent screen if prompted
-4. Application type: "Desktop application"
-5. Name: "Konoha Bot Drive Access"
-6. Download the JSON file
+1.  **Get Auth Link:**
+    Send the following command to the bot (as the Bot Owner):
+    ```
+    .authdrive url
+    ```
+    The bot will reply with a link.
 
-### 3. Install Credentials
-1. Rename downloaded file to `google-credentials.json`
-2. Place it in the `config/` directory
-3. Replace the template file
+2.  **Authorize:**
+    -   Click the link.
+    -   Sign in with the Google Account that has the Excel files.
+    -   Allow access to Google Drive.
+    -   Copy the code provided by Google.
 
-### 4. Bot Configuration
-1. Get your Google Drive folder ID:
-   - Open Google Drive in browser
-   - Navigate to the folder containing Excel files
-   - Copy the folder ID from the URL: `https://drive.google.com/drive/folders/FOLDER_ID_HERE`
+3.  **Complete Setup:**
+    Send the code back to the bot:
+    ```
+    .authdrive code YOUR_COPIED_CODE_HERE
+    ```
+    *Example:* `.authdrive code 4/0AeaYSH...`
 
-2. Update the folder ID in config.js:
-   ```javascript
-   googleDrive: {
-     folderId: 'YOUR_FOLDER_ID_HERE'
-   }
-   ```
+4.  **Verify:**
+    Check if everything is working:
+    ```
+    .authdrive status
+    ```
 
-### 5. First-Time Authentication
-1. Start the bot
-2. The bot will show an authentication URL in console
-3. Open the URL in browser
-4. Allow access to your Google Drive
-5. Copy the authorization code
-6. The bot will save the token for future use
+---
 
-### 6. Configure Contacts
-Use these commands to set up Excel delivery contacts:
+##  Configuration Commands
 
-```bash
-# Add a contact
-.setcontact add admin 1234567890@c.us Admin Team
+Once authenticated, you need to tell the bot **which folder** to watch and **who** to send the files to.
 
-# Add current chat as contact
-.setcontact current reports Reports Team
+### 1. Set Up a Folder Mapping
+Map a Google Drive folder to a specific WhatsApp chat (Group or Individual).
 
-# View all contacts
-.showcontacts
-
-# Remove a contact
-.setcontact remove admin
+**Command:**
+```
+.setfolder [Folder_ID] [Chat_ID] [Nickname]
 ```
 
-### 7. Usage Commands
+-   **Folder_ID:** The ID from the Google Drive URL (e.g., `1abc...` from `drive.google.com/drive/folders/1abc...`).
+-   **Chat_ID:** The WhatsApp ID of the group or person.
+    -   *Tip:* Use `.getchatid` in the target group to get its ID easily.
+-   **Nickname:** A short name to refer to this mapping (e.g., `sales`, `daily-report`).
 
-```bash
-# Fetch and send to all contacts
-.fetchexcel
-
-# Fetch and send to specific contact
-.fetchexcel admin
-
-# View configured contacts
-.showcontacts
-
-# Manage contacts (bot owner only)
-.setcontact [action] [parameters]
+**Example:**
+```
+.setfolder 12345abcde 1203630239823@g.us sales-team
 ```
 
-## File Formats Supported
-- Excel files (.xlsx, .xls)
-- Google Sheets (exported as Excel)
+### 2. Manage Contacts (Legacy/Direct Mode)
+If you want to send files to specific contacts without auto-fetching:
 
-## Security Features
-- Only bot owner can manage contacts
-- Only bot owner can fetch files
-- Secure OAuth 2.0 authentication
-- Local token storage
+-   **Add Contact:** `.setcontact [Name] [Number]`
+    -   *Example:* `.setcontact John 628123456789`
+-   **List Contacts:** `.showcontacts`
 
-## Troubleshooting
+---
 
-### Common Issues
-1. **"Google Drive not configured"**
-   - Ensure credentials file exists
-   - Check folder ID is set
-   - Verify authentication completed
+##  Usage Commands
 
-2. **"No Excel files found"**
-   - Check folder ID is correct
-   - Ensure folder contains Excel files
-   - Verify folder permissions
+### Fetch Excel Files
+Manually trigger a check for the latest Excel file in a mapped folder.
 
-3. **"Failed to send to contact"**
-   - Check chat ID format
-   - Verify contact exists in WhatsApp
-   - Check bot has permission to send files
+**Command:**
+```
+.fetchexcel [Nickname]
+```
+-   **Nickname:** The nickname you defined in `.setfolder`.
 
-### Support
-For setup assistance, contact the bot administrator.
+**Example:**
+```
+.fetchexcel sales-team
+```
+The bot will:
+1.  Look into the Google Drive folder associated with `sales-team`.
+2.  Find the most recently modified Excel file.
+3.  Download it.
+4.  Send it to the chat associated with `sales-team`.
+
+### Manage Mappings
+-   **Show All Mappings:**
+    ```
+    .showfolders
+    ```
+-   **Stop/Remove a Mapping:**
+    ```
+    .stopfolder [Nickname]
+    ```
+
+---
+
+##  Troubleshooting
+
+-   **"Google Drive manager is not available"**: Ensure `google-credentials.json` is valid and restart the bot.
+-   **"Authentication failed"**: The code might have expired. Generate a new URL with `.authdrive url`.
+-   **"Folder not found"**: Check if the Folder ID is correct and if the authenticated Google account has access to it.
+
