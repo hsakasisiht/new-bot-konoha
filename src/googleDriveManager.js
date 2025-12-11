@@ -94,6 +94,12 @@ class GoogleDriveManager {
      */
     async setAuthCode(code) {
         try {
+            // Check if auth object supports getToken (it won't if it's a Service Account)
+            if (!this.auth || typeof this.auth.getToken !== 'function') {
+                console.error(chalk.red('❌ Authentication method does not support authorization codes (likely using Service Account)'));
+                return false;
+            }
+
             const { tokens } = await this.auth.getToken(code);
             this.auth.setCredentials(tokens);
 

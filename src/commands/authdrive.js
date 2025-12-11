@@ -118,6 +118,13 @@ class AuthDriveCommand {
      * Set authorization code
      */
     async setAuthCode(message, code, botInstance) {
+        // Check if using Service Account
+        const credentials = require('../../config/google-credentials.json');
+        if (credentials.type === 'service_account') {
+            await message.reply('✅ **Service Account Detected**\n\nYou are using a Service Account, so manual authentication is NOT required. The bot is already authenticated!');
+            return;
+        }
+
         await message.reply('🔄 Processing authorization code...');
         
         const success = await botInstance.googleDriveManager.setAuthCode(code);
