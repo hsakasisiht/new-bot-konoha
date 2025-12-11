@@ -72,6 +72,18 @@ class AuthDriveCommand {
         try {
             // Initialize OAuth client if needed
             const credentials = require('../../config/google-credentials.json');
+            
+            // Check if using Service Account
+            if (credentials.type === 'service_account') {
+                await message.reply('✅ **Service Account Detected**\n\nYou are using a Service Account, so manual authentication is NOT required. The bot is already authenticated!');
+                return;
+            }
+
+            if (!credentials.installed && !credentials.web) {
+                await message.reply('❌ Invalid credentials file. Please ensure you downloaded the OAuth 2.0 Client ID JSON from Google Cloud Console.');
+                return;
+            }
+
             const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
             
             if (!botInstance.googleDriveManager.auth) {
